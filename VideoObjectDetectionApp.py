@@ -2,7 +2,6 @@ import streamlit as st
 import tensorflow as tf
 import cv2
 import numpy as np
-from moviepy.editor import VideoFileClip
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.inception_v3 import preprocess_input, decode_predictions
 import tempfile
@@ -16,7 +15,7 @@ def load_model():
 model = load_model()
 
 # Set the maximum file size (in bytes)
-MAX_FILE_SIZE = 40 * 1024 * 1024  # 25 MB
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 def predict_image(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -41,23 +40,22 @@ def process_video(video_path, search_object=None):
         if not ret:
             break
 
-        # Process 1 frame per second
-        if frame_count % fps == 0:
-            predictions = predict_image(frame)
-            frame_result = {
-                'frame': frame_count,
-                'time': frame_count / fps,
-                'predictions': [{'label': label, 'score': float(score)} for _, label, score in predictions]
-            }
-            results.append(frame_result)
+        # Process every frame
+        predictions = predict_image(frame)
+        frame_result = {
+            'frame': frame_count,
+            'time': frame_count / fps,
+            'predictions': [{'label': label, 'score': float(score)} for _, label, score in predictions]
+        }
+        results.append(frame_result)
 
-            # Check if the searched object is in this frame
-            if search_object and not object_found:
-                for _, label, score in predictions:
-                    if search_object.lower() in label.lower():
-                        object_found = True
-                        object_frame = frame
-                        break
+        # Check if the searched object is in this frame
+        if search_object and not object_found:
+            for _, label, score in predictions:
+                if search_object.lower() in label.lower():
+                    object_found = True
+                    object_frame = frame
+                    break
 
         frame_count += 1
 
@@ -67,7 +65,7 @@ def process_video(video_path, search_object=None):
 def main():
     st.title("Video Object Detection")
 
-    uploaded_file = st.file_uploader("Choose a video file (max 40 MB)", type=["mp4", "avi", "mov"])
+    uploaded_file = st.file_uploader("Choose a video file (max 10 MB)", type=["mp4", "avi", "mov"])
     search_object = st.text_input("Search for object (optional)")
 
     if uploaded_file is not None:
