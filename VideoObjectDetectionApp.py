@@ -2,7 +2,6 @@ import streamlit as st
 import tensorflow as tf
 import cv2
 import numpy as np
-import base64
 from moviepy.editor import VideoFileClip
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.inception_v3 import preprocess_input, decode_predictions
