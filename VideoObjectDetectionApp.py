@@ -16,7 +16,7 @@ def load_model():
 model = load_model()
 
 # Set the maximum file size (in bytes)
-MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
+MAX_FILE_SIZE = 40 * 1024 * 1024  # 25 MB
 
 def predict_image(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -67,7 +67,7 @@ def process_video(video_path, search_object=None):
 def main():
     st.title("Video Object Detection")
 
-    uploaded_file = st.file_uploader("Choose a video file (max 25 MB)", type=["mp4", "avi", "mov"])
+    uploaded_file = st.file_uploader("Choose a video file (max 40 MB)", type=["mp4", "avi", "mov"])
     search_object = st.text_input("Search for object (optional)")
 
     if uploaded_file is not None:
