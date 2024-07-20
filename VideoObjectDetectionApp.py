@@ -7,6 +7,7 @@ from moviepy.editor import VideoFileClip
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.inception_v3 import preprocess_input, decode_predictions
 import tempfile
+import os
 
 # Load the pre-trained InceptionV3 model
 @st.cache_resource
@@ -16,7 +17,7 @@ def load_model():
 model = load_model()
 
 # Set the maximum file size (in bytes)
-MAX_FILE_SIZE = 20 * 1024 * 1024  # 20 MB
+MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
 
 def predict_image(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -67,14 +68,14 @@ def process_video(video_path, search_object=None):
 def main():
     st.title("Video Object Detection")
 
-    uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "mov"])
+    uploaded_file = st.file_uploader("Choose a video file (max 25 MB)", type=["mp4", "avi", "mov"])
     search_object = st.text_input("Search for object (optional)")
 
     if uploaded_file is not None:
         file_size = uploaded_file.size
 
         if file_size > MAX_FILE_SIZE:
-            st.error(f"File size exceeds the limit of {MAX_FILE_SIZE/1024/1024} MB")
+            st.error(f"File size exceeds the limit of {MAX_FILE_SIZE / 1024 / 1024} MB")
         else:
             with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
                 tmp_file.write(uploaded_file.read())
@@ -105,7 +106,6 @@ def main():
                     st.write(f"  {label}: {score*100:.2f}%")
 
             # Clean up the temporary file
-            import os
             os.unlink(tmp_file_path)
 
 if __name__ == '__main__':
