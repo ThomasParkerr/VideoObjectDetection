@@ -15,7 +15,7 @@ def load_model():
 model = load_model()
 
 # Set the maximum file size (in bytes)
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
 
 def predict_image(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -31,9 +31,8 @@ def process_video(video_path, search_object=None):
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
     results = []
+    frames_with_object = []
     frame_count = 0
-    object_found = False
-    object_frame = None
 
     while True:
         ret, frame = cap.read()
@@ -50,22 +49,21 @@ def process_video(video_path, search_object=None):
         results.append(frame_result)
 
         # Check if the searched object is in this frame
-        if search_object and not object_found:
+        if search_object:
             for _, label, score in predictions:
                 if search_object.lower() in label.lower():
-                    object_found = True
-                    object_frame = frame
+                    frames_with_object.append(frame)
                     break
 
         frame_count += 1
 
     cap.release()
-    return results, object_found, object_frame
+    return results, frames_with_object
 
 def main():
     st.title("Video Object Detection")
 
-    uploaded_file = st.file_uploader("Choose a video file (max 10 MB)", type=["mp4", "avi", "mov"])
+    uploaded_file = st.file_uploader("Choose a video file (max 25 MB)", type=["mp4", "avi", "mov"])
     search_object = st.text_input("Search for object (optional)")
 
     if uploaded_file is not None:
@@ -80,12 +78,13 @@ def main():
 
             if uploaded_file.name.lower().endswith(('.mp4', '.avi', '.mov')):
                 with st.spinner('Processing video...'):
-                    results, object_found, object_frame = process_video(tmp_file_path, search_object)
+                    results, frames_with_object = process_video(tmp_file_path, search_object)
 
                 if search_object:
-                    if object_found:
-                        st.success(f'Object "{search_object}" found!')
-                        st.image(object_frame, channels="BGR", caption=f'Frame containing "{search_object}"')
+                    if frames_with_object:
+                        st.success(f'Object "{search_object}" found in the following frames:')
+                        for idx, frame in enumerate(frames_with_object):
+                            st.image(frame, channels="BGR", caption=f'Frame {idx+1} containing "{search_object}"')
                     else:
                         st.warning(f'Object "{search_object}" not found in the video.')
                 else:
